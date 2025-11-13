@@ -126,6 +126,7 @@ controller_server:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.5
       movement_time_allowance: 10.0
+
     # Goal checker parameters
     #precise_goal_checker:
     #  plugin: "nav2_controller::SimpleGoalChecker"
@@ -136,72 +137,45 @@ controller_server:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.5
 
-    # MPPI controller parameters (replaces DWB)
+    # Controller parameters (Regulated Pure Pursuit)
     FollowPath:
-      plugin: "nav2_mppi_controller::MPPIController"
-
-      # Motion model and sampling
-      motion_model: "DiffDrive"
-      time_steps: 15
-      model_dt: 0.05          # match 20 Hz controller period
-      batch_size: 1000
-      iteration_count: 1
-
-      # Velocity limits (matched to your robot limits)
-      vx_min: 0.0
-      vx_max: 0.26
-      vy_min: 0.0
-      vy_max: 0.0
-      wz_min: -1.0
-      wz_max: 1.0
-
-      # Sampling noise
-      vx_std: 0.2
-      vy_std: 0.0
-      wz_std: 0.4
-
-      # MPPI optimization parameters
-      temperature: 0.25
-      gamma: 0.015
-      reset_period: 1.0
-      regenerate_noises: false
-      visualize: false
-
-      # General
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+      debug_trajectory_details: True
       transform_tolerance: 0.2
-      prune_distance: 1.7
 
-      # Valid MPPI critics
-      critics: ["ObstaclesCritic", "GoalAngleCritic", "GoalCritic", "PathAlignCritic", "PathFollowCritic", "PreferForwardCritic"]
+      # Kinematics & speed targets
+      desired_linear_vel: 0.26          # match your max linear speed
+      min_approach_linear_velocity: 0.05
+      max_angular_vel: 1.0
+      approach_velocity_scaling: 0.5
 
-      ObstaclesCritic:
-        enabled: True
-        cost_weight: 4.0
+      # Lookahead settings
+      lookahead_dist: 0.6
+      min_lookahead_dist: 0.3
+      max_lookahead_dist: 0.9
+      lookahead_time: 1.0
+      use_velocity_scaled_lookahead_dist: True
 
-      PathAlignCritic:
-        enabled: True
-        cost_weight: 32.0
-        forward_point_distance: 0.1
+      # Regulation near obstacles/curvature
+      use_regulated_linear_velocity_scaling: True
+      use_cost_regulated_linear_velocity_scaling: True
+      regulated_linear_scaling_min_radius: 0.9
+      regulated_linear_scaling_min_speed: 0.05
+      cost_scaling_dist: 0.6
+      cost_scaling_gain: 1.0
 
-      PathFollowCritic:
-        enabled: True
-        cost_weight: 32.0
+      # Heading behaviors
+      use_rotate_to_heading: True
+      rotate_to_heading_angular_vel: 1.0
+      max_robot_pose_search_dist: 10.0
+      allow_reversing: False
 
-      GoalCritic:
-        enabled: True
-        cost_weight: 24.0
-        goal_distance: 0.25
-
-      GoalAngleCritic:
-        enabled: True
-        cost_weight: 24.0
-
-      PreferForwardCritic:
-        enabled: True
-        cost_weight: 10.0
-        offset: 0.05
+      # Goal tolerance helpers (kept similar to your DWB block where applicable)
+      xy_goal_tolerance: 0.25
+      trans_stopped_velocity: 0.25
+      stateful: True
 
 local_costmap:
   local_costmap:

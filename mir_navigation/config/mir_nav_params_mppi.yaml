@@ -135,8 +135,8 @@ controller_server:
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.30
+      yaw_goal_tolerance: 0.30
 
     # MPPI controller parameters (replaces DWB)
     FollowPath:
@@ -150,7 +150,7 @@ controller_server:
       iteration_count: 1
 
       # Velocity limits (matched to your robot limits)
-      vx_min: 0.0
+      vx_min: -0.26
       vx_max: 0.26
       vy_min: 0.0
       vy_max: 0.0
