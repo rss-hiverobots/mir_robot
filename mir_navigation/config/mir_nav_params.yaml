@@ -137,46 +137,71 @@ controller_server:
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.25
       yaw_goal_tolerance: 0.25
-    # DWB parameters
+
+    # MPPI controller parameters (replaces DWB)
     FollowPath:
-      plugin: "dwb_core::DWBLocalPlanner"
-      debug_trajectory_details: True
-      min_vel_x: 0.0
-      min_vel_y: 0.0
-      max_vel_x: 0.26
-      max_vel_y: 0.0
-      max_vel_theta: 1.0
-      min_speed_xy: 0.0
-      max_speed_xy: 0.26
-      min_speed_theta: 0.0
-      acc_lim_x: 2.5
-      acc_lim_y: 0.0
-      acc_lim_theta: 3.2
-      decel_lim_x: -2.5
-      decel_lim_y: 0.0
-      decel_lim_theta: -3.2
-      vx_samples: 20
-      vy_samples: 5
-      vtheta_samples: 20
-      sim_time: 1.7
-      linear_granularity: 0.05
-      angular_granularity: 0.025
+      plugin: "nav2_mppi_controller::MPPIController"
+
+      # Motion model and sampling
+      motion_model: "DiffDrive"
+      time_steps: 15
+      model_dt: 0.05          # match 20 Hz controller period
+      batch_size: 1000
+      iteration_count: 1
+
+      # Velocity limits (matched to your robot limits)
+      vx_min: 0.0
+      vx_max: 0.26
+      vy_min: 0.0
+      vy_max: 0.0
+      wz_min: -1.0
+      wz_max: 1.0
+
+      # Sampling noise
+      vx_std: 0.2
+      vy_std: 0.0
+      wz_std: 0.4
+
+      # MPPI optimization parameters
+      temperature: 0.25
+      gamma: 0.015
+      reset_period: 1.0
+      regenerate_noises: false
+      visualize: false
+
+      # General
       transform_tolerance: 0.2
-      xy_goal_tolerance: 0.25
-      trans_stopped_velocity: 0.25
-      short_circuit_trajectory_evaluation: True
-      stateful: True
-      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist", "ObstacleFootprint"]
-      BaseObstacle.scale: 0.02
-      PathAlign.scale: 32.0
-      PathAlign.forward_point_distance: 0.1
-      GoalAlign.scale: 24.0
-      GoalAlign.forward_point_distance: 0.1
-      PathDist.scale: 32.0
-      GoalDist.scale: 24.0
-      RotateToGoal.scale: 24.0
-      RotateToGoal.slowing_factor: 5.0
-      RotateToGoal.lookahead_time: -1.0
+      prune_distance: 1.7
+
+      # Valid MPPI critics
+      critics: ["ObstaclesCritic", "GoalAngleCritic", "GoalCritic", "PathAlignCritic", "PathFollowCritic", "PreferForwardCritic"]
+
+      ObstaclesCritic:
+        enabled: True
+        cost_weight: 4.0
+
+      PathAlignCritic:
+        enabled: True
+        cost_weight: 32.0
+        forward_point_distance: 0.1
+
+      PathFollowCritic:
+        enabled: True
+        cost_weight: 32.0
+
+      GoalCritic:
+        enabled: True
+        cost_weight: 24.0
+        goal_distance: 0.25
+
+      GoalAngleCritic:
+        enabled: True
+        cost_weight: 24.0
+
+      PreferForwardCritic:
+        enabled: True
+        cost_weight: 10.0
+        offset: 0.05
 
 local_costmap:
   local_costmap:
