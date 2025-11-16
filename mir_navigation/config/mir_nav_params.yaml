@@ -139,31 +139,14 @@ controller_server:
       xy_goal_tolerance: 0.25
       yaw_goal_tolerance: 0.5
 
-    # DWB parameters
-    # (kept comment as requested; using Rotation Shim + Regulated Pure Pursuit instead)
-
-    # Controller parameters (Rotation Shim wrapping RPP)
+    # Controller parameters (Regulated Pure Pursuit)
     FollowPath:
-      plugin: "nav2_rotation_shim_controller::RotationShimController"
-
-      # Which controller to use after rotating to path heading
-      primary_controller: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
-
-      # Rotation Shim settings
-      angular_dist_threshold: 0.785          # rotate if > ~45° off path heading
-      angular_disengage_threshold: 0.3925     # hand over when within ~22.5° of heading
-      forward_sampling_distance: 0.5
-      rotate_to_heading_angular_vel: 1.0
-      max_angular_accel: 3.2
-      simulate_ahead_time: 1.0
-      rotate_to_goal_heading: False
-      closed_loop: True
-      use_path_orientations: False
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+      debug_trajectory_details: True
       transform_tolerance: 0.2
 
-      # --- Primary controller (Regulated Pure Pursuit) params below ---
-      # Kinematics & speed targets (aligned with your previous limits)
-      desired_linear_vel: 0.26
+      # Kinematics & speed targets
+      desired_linear_vel: 0.26          # match your max linear speed
       min_approach_linear_velocity: 0.05
       max_angular_vel: 1.0
       approach_velocity_scaling: 0.5
@@ -175,7 +158,7 @@ controller_server:
       lookahead_time: 1.0
       use_velocity_scaled_lookahead_dist: True
 
-      # Regulation near obstacles / curvature
+      # Regulation near obstacles/curvature
       use_regulated_linear_velocity_scaling: True
       use_cost_regulated_linear_velocity_scaling: True
       regulated_linear_scaling_min_radius: 0.9
@@ -183,15 +166,16 @@ controller_server:
       cost_scaling_dist: 0.6
       cost_scaling_gain: 1.0
 
-      # Disable RPP’s own rotate-to-heading (Rotation Shim handles it)
-      use_rotate_to_heading: False
-
-      # Misc
+      # Heading behaviors
+      use_rotate_to_heading: True
+      rotate_to_heading_angular_vel: 1.0
       max_robot_pose_search_dist: 10.0
+      allow_reversing: False
+
+      # Goal tolerance helpers (kept similar to your DWB block where applicable)
       xy_goal_tolerance: 0.25
       trans_stopped_velocity: 0.25
       stateful: True
-
 
 local_costmap:
   local_costmap:
